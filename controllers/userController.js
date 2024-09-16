@@ -1,5 +1,9 @@
 import User from '../models/userModel.js'
-import bcrypt, { hash } from 'bcrypt'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import 'dotenv/config'
+
+const {JWT_SECRET} = process.env
 
 export async function getAll (req, res) {
     try {
@@ -41,6 +45,32 @@ export async function register (req, res) {
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' })
     }
+}
+
+export async function login (req, res) {
+    const { username, password } = req.body
+
+    if (!username || !password) return res.status(400).json({error: 'Username and password needed.'})
+    
+        try {
+            const userData = await User.findOne({
+                where: {
+                    username: username
+                }
+            })
+
+            if (!userData) return res.status(404).json({error: 'Username does not exist.'})
+            
+            const verifyPassword = await bcrypt.compare(password, userData.password)
+
+            if (!verifyPassword) return res.status(400).json({error: 'Incorrect Password'})
+
+            const token = jwt.sign({userId: userData._id, username: userData.username, password: userData.password}, JWT_SECRET)
+            
+            return res.status(200).json({msg: 'Loged in successfully.', userData, token})
+        } catch (error) {
+            return res.status(500).json({error: 'Internal Server Error.'})
+        }
 }
 
 export async function deleteUser (req, res) {
