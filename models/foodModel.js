@@ -1,5 +1,6 @@
 import { DataTypes, Sequelize, Model } from "@sequelize/core"
 import { MySqlDialect } from "@sequelize/mysql"
+import Restaurant from './restaurantModel.js'
 
 const sequelize = new Sequelize({dialect: MySqlDialect})
 
@@ -8,7 +9,7 @@ class Food extends Model {}
 Food.init(
     {
         id: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
@@ -24,10 +25,10 @@ Food.init(
             type: DataTypes.TEXT,
             allowNull: true
         },
-        menuId: {
+        restaurantId: {
             type: DataTypes.INTEGER,
             references: {
-                model: 'Menu',
+                model: 'Restaurant',
                 key: 'id'
             }
         }
@@ -38,3 +39,9 @@ Food.init(
         timestamps: false
     }
 )
+
+Food.belongsTo(Restaurant, { foreignKey: 'restaurantId' })
+
+sequelize.sync()
+
+export default Food
