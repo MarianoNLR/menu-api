@@ -36,4 +36,8 @@ Restaurant.init(
     }
 )
 
+Restaurant.belongsTo(User, {foreignKey: 'userId'})
+
+sequelize.sync()
+
 export default Restaurant
