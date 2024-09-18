@@ -24,6 +24,27 @@ export async function getById (req, res) {
     }
 }
 
+export async function createRestaurant (req, res) {
+    const { userId } = req
+    const { name, address } = req.body
+
+    try {
+        const nameExists = await Restaurant.findOne({name: name})
+
+        if (nameExists) return res.status(401).json({error: `A restaurant with name '${name}' already exists.`})
+        
+
+        const result = await Restaurant.create({ name, address, userId })
+
+        console.log(result)
+
+        return res.status(201).json({msg: 'Restaurant has been created successfully.', data: result})
+        
+    } catch (error) {
+        return res.status(500).json({error: 'Internal Server Error.'})
+    }
+}
+
 export async function updateRestaurant (req, res) {
     const { userId } = req
     const { restaurantName } = req.params
