@@ -1,7 +1,7 @@
 import Food from '../models/foodModel.js'
 import Restaurant from '../models/restaurantModel.js'
 
-export async function getAllByRestaurant (req, res) {
+export async function getAllByRestaurantId (req, res) {
     const { restaurantId } = req.params
     const { userId } = req
 
@@ -33,6 +33,29 @@ export async function getFood (req, res) {
         return res.status(200).json({data: foodData})
     } catch (error) {
         return res.status(500).json({error: 'Internal Server Error.'})
+    }
+}
+
+export async function createFood (req, res) {
+    const { userId } = req
+    const { restaurantName } = req.params
+    const { name, price, description } = req.body
+
+    if (!name  || !price) return res.status(400).json({error: 'Name and price must have a value.'})
+    
+    if (typeof price !== 'number') return res.status(400).json({error: 'Price must be a number.'})
+
+    try {
+        const restaurantData = await Restaurant.findOne({name: restaurantName})
+
+        if (restaurantData.userId != userId) return res.status(401).json({error: 'Unauthorized.'})
+
+        const result = await Food.create({name, price, description, restaurantId: restaurantData.id})
+
+        return res.status(201).json({msg: 'Food has been created succesfully.', data: result})
+
+    } catch (error) {
+        return res.status(500).json({error: 'Internal Server Error. Please, try again.'})
     }
 }
 
